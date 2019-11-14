@@ -1,0 +1,23 @@
+package rest_assured_api_test.utils;
+
+import org.apache.commons.lang3.RandomStringUtils;
+
+public class Employee {
+
+    public static String getEmpName() {
+        String randomString = RandomStringUtils.randomAlphabetic(1);
+        return ("chakra" + randomString);
+    }
+
+    public static String getEmpSal() {
+        String randomString = RandomStringUtils.randomNumeric(10);
+        return (randomString);
+    }
+
+    public static String getEmpAge() {
+        String randomString = RandomStringUtils.randomAlphabetic(1);
+        return (randomString);
+    }
+
+
+}

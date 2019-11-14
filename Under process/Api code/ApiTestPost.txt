@@ -1,0 +1,61 @@
+package rest_assured_api_test.apitests;
+
+import io.restassured.RestAssured;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import rest_assured_api_test.model.Customer;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.equalTo;
+
+public class ApiTestPost {
+
+    private Customer customer;
+    Map<String, String> allCustomerData;
+
+    @BeforeClass
+    public void data() throws IOException {
+
+        customer=new Customer();
+        customer.setFirstName("balla1");
+        customer.setLastName("chakra1");
+        customer.setUserName("ballachakra4441");
+        customer.setPassword("Balla1231");
+        customer.setEmail("ballachakri1@yahoo.com");
+
+        allCustomerData=new HashMap<>();
+        allCustomerData.put("FirstName",customer.getFirstName());
+        allCustomerData.put("LastName",customer.getLastName());
+        allCustomerData.put("UserName",customer.getUserName());
+        allCustomerData.put("Password",customer.getPassword());
+        allCustomerData.put("Email",customer.getEmail());
+
+        RestAssured.baseURI="http://restapi.demoqa.com/customer";
+        RestAssured.basePath="/register";
+    }
+    /**
+     *  ignore the test as username must be unique in the resources to insert new customer.
+     *
+     */
+    @Test(enabled = false)
+    public void sendData() throws IOException {
+
+     given()
+             .contentType("application/json")
+             .body(allCustomerData)
+       .when()
+            .post()
+       .then()
+             .statusCode(200)
+             .and()
+             .body("SuccessCode",equalTo("OPERATION_SUCCESS"))
+             .and()
+             .body("Message",equalTo("Operation completed successfully"))
+             .log().all();
+    }
+}

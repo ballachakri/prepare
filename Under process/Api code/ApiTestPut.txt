@@ -1,0 +1,48 @@
+package rest_assured_api_test.apitests;
+
+
+import io.restassured.RestAssured;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import rest_assured_api_test.utils.Employee;
+
+import java.util.HashMap;
+
+import static io.restassured.RestAssured.given;
+
+/**
+ * PUT request sample demo
+ * uri : http://dummy.restapiexample.com/api/v1
+ * base path : /update/EMPID
+ * pass employee as path variable to check list of employees
+ */
+public class ApiTestPut {
+
+    private String empId="5310";
+
+    private static HashMap<String, String> map=new HashMap();
+
+    @BeforeClass
+    public void putDemoData() {
+    map.put("name",Employee.getEmpName());
+    map.put("salary",Employee.getEmpSal());
+    map.put("age",Employee.getEmpAge());
+
+        RestAssured.baseURI="http://dummy.restapiexample.com/api/v1";
+        RestAssured.basePath="/update/"+empId;
+
+    }
+    @Test
+    public void putRequest()
+    {
+         given()
+             .contentType("application/json")
+             .body(map)
+         .when()
+             .put()
+         .then()
+              .statusCode(200)
+               .log().all();
+    }
+
+}

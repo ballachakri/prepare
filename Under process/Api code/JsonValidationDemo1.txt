@@ -1,0 +1,88 @@
+package rest_assured_api_test.jsonvalidations;
+
+import io.restassured.internal.RestAssuredResponseOptionsGroovyImpl;
+import org.testng.annotations.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+
+public class JsonValidationDemo1 {
+
+    /**
+     * Validation of JSON response Status Code.
+     */
+    @Test
+    public void jsonVal1() {
+        given()
+
+                .when()
+                .get("http://jsonplaceholder.typicode.com/posts/5")
+                .then()
+                .statusCode(200);
+
+
+/**
+ * below code is also valid BDD format
+ */
+    // given().when().get("http://jsonplaceholder.typicode.com/posts/5").then().statusCode(200);
+
+}
+
+
+    /**
+     * Validation of JSON response log response.
+     */
+
+    @Test
+    public void jsonVal2()
+    {
+        given()
+                .when()
+                    .get("http://services.groupkt.com/country/get/iso2code/IN")
+                .then()
+                    .statusCode(200)
+                    .log().all();
+    }
+    /**
+     * Validation of single element of JSON response body, requires JSONPath finder Chrome Extension
+     */
+
+    @Test
+    public void jsonVal3()
+    {
+        given()
+                .when()
+                .get("http://services.groupkt.com/country/get/iso2code/IN")
+                .then()
+                .statusCode(200)
+                .log().all()
+
+                .body("RestResponse.result.name",equalTo("India"));
+
+
+
+    }
+    /**
+     * Validation of multiple elements of JSON response body , requires JSONPath finder Chrome Extension
+     */
+
+    @Test
+    public void jsonVal4()
+    {
+        given()
+                .when()
+                .get("http://services.groupkt.com/country/get/all")
+                .then()
+                .statusCode(200)
+                .log().all()
+
+                .body("RestResponse.result.name",hasItems("India","China"));
+
+
+
+    }
+
+
+}
+

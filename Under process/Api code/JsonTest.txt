@@ -1,0 +1,29 @@
+package rest_assured_api_test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import rest_assured_api_test.model.Customer;
+
+
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class JsonTest {
+    public static void main(String[] args) throws IOException {
+
+       Customer customerData=new Customer();
+
+        customerData.setFirstName("Chakra");
+        customerData.setLastName("balla");
+        customerData.setUserName("ballachakri");
+        customerData.setPassword("Balla123");
+        customerData.setEmail("ballachakir@yahoo.com");
+
+        ObjectMapper mapper=new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        FileWriter fw=new FileWriter("C:\\Users\\sball\\git\\cathkidston.testautomation\\src\\test\\java\\restassuredAPI\\test\\customer.json");
+        mapper.writeValue(fw,customerData);
+        mapper.writeValue(System.out,customerData);
+    }
+}

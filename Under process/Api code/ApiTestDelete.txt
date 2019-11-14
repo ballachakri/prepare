@@ -1,0 +1,43 @@
+package rest_assured_api_test.apitests;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.contains;
+
+public class ApiTestDelete {
+
+ private String empId="5310";
+
+    /**
+     *  ignore the test as empid should exists in the resources.
+     *
+     */
+    @Test(enabled = false)
+    public void deleteReq() {
+
+        RestAssured.baseURI="http://dummy.restapiexample.com/api/v1";
+        RestAssured.basePath="/delete/"+empId;
+
+        Response resp=
+
+        given()
+
+        .when()
+             .delete()
+        .then()
+             .statusCode(200)
+             .statusLine("HTTP/1.1 200 OK")
+             .log().all()
+             .extract().response();
+
+         String str=resp.asString();
+
+        Assert.assertEquals(str, contains("successfully! deleted Records"));
+    }
+
+
+}
