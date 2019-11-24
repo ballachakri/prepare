@@ -1,3 +1,4 @@
+To clear console loggin errors: add below 2 dependencies
 
     <dependency>
         <groupId>org.slf4j</groupId>
@@ -13,8 +14,17 @@
     <version>1.7.25</version>
 </dependency>
 
+
+Log4j 
 Base or Hooks class
 
   Logger logger = LoggerFactory.getLogger(HelloJavaLogging.class);
         logger.info("This is how you configure Java Logging with SLF4J");
     }
+
+
+To open command prompt as Administrator:
+
+Press Windows+R
+Type cmd in box
+then press CTRL+SHFIT+ENTER
