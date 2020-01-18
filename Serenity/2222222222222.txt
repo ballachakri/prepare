@@ -1,0 +1,87 @@
+PageObject class
+For example in a LoginPage we could have components for a password text field and username. Instead of having methods like public WebElement getPasswordTextfield(), it makes more sense to just expose a login(String username, String password) or typeUsername() or typePassword().
+
+The idea would be that should the components of the web page would change, we could limit the need for refactor just to the inside of the Page Object class.
+
+Serenity provides it's own helper class PageObject and we should extend it. We get the benefits of automatic creation and injection of Webdriver inside the PageObject and also access to a range of helper methods: find(By.name(..)), typeInto, clickOn, waitFor, etc.
+
+@DefaultUrl("http://localhost/login") is useful when doing loginPage.open() to get directly to that url. We'll see further on how this is passed dynamically through serenity.properties .
+
+
+Serenity Step class
+While we looked at the fact that in Cucumber through @Given, @When, @Then we supply Step definition, Serenity also offers ScenarioSteps class for extension.
+This extra layer of indirection helps with keeping the "what" separate from the "how", it acts as an adapter from the business language in Cucumber to the more technical low level of implementation. Without it step definitions would tend to become rather technical, which limits reuse and makes them harder to understand and maintain.
+For ex. a Cucumber step would say "I login with 'user' and 'password'" => Serenity Steps: "User types 'admin' in 'username' textfield" and "User types '123456' in 'password' field" and "User clicks 'Submit'"
+
+Each @Step annotation method that gets called inside the Cucumber step definition method, makes the method appear inside the test report under the Cucumber step.
+
+The LoginPage object gets automatically instantiated and the Webdriver preconfigured instance injected inside.
+
+"Both scenario step libraries (annotated with the @Steps annotation) and Page Objects that are declared inside the Cucumber step definition classes will be automatically instantiated."
+
+Notice we could have used the directly the LoginPage PageObject, and not have to bother with the extra layer of indirection in the Serenity LoginSteps, but that would have meant that we would not have those @Step method in the final Serenity test report along with the printscreens.
+
+The code
+Let's now look at what you need to setup to start with your own Cucumber Serenity tests.
+The source code can be downloaded from here.
+
+First of we'll need a special test runner CucumberWithSerenity
+
+@RunWith(CucumberWithSerenity.class)
+@CucumberOptions(
+        format = { "pretty", "html:target/pippo", "json:target/cucumber.json" },
+        features = {"src/main/resources/features/"},
+        glue = "ro.fortsoft.pippo.demo.bdd.cucumber")
+public class PippoCrudDemoRunner {  
+}
+through which we specify where the .feature files are located and the package under which the Cucumber step definition classes are.
+There is also serenity.properties that allows customization of Webdriver, and the generated test reports.
+
+webdriver.remote.driver = firefox
+
+webdriver.base.url=http://tomcat:8080/pippo/  
+webdriver.remote.url = http://hub:4444/wd/hub
+
+serenity.use.unique.browser = true  
+serenity.take.screenshots = BEFORE_AND_AFTER_EACH_STEP  
+Notice in the above props with url-s we reference the containers by the name we configured them in docker-compose.yml('tomcat' container and 'hub' container of the selenium-grid).
+
+webdriver.remote.url = http://hub:4444/wd/hub - the address of the selenium grid hub
+webdriver.base.url=http://tomcat:8080/pippo/ - this replaces the 'host' part in 
+@DefaultUrl("http://localhost/login")
+public class LoginPage extends PageObject {
+we mentioned before, and which would mean 'http://tomcat:8080/pippo/login'
+Running the tests with maven
+We're references the CucumberWithSerenity by including the package where it resides from the maven-failsafe-plugin which performs integration tests.
+
+<plugin>  
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.18</version>
+        <configuration>
+                <includes>
+                        <include>**/runner/*.java</include>
+                    </includes>
+                    <reuseForks>true</reuseForks>
+        </configuration>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>integration-test</goal>
+                    <goal>verify</goal>
+                </goals>
+            </execution>
+        </executions>
+</plugin>  
+The application to run the ui tests against
+We're using as example in our BDD testing setup the demo app pippo-crud-ng of the pippo web framework.
+I always take opportunity to present other interesting frameworks and such is pippo java web framework which I like as it's very lightweight and build with the concept of modularity and the small footprint makes it ideal for IoT applications. If you have not already, please take a look and maybe consider it as a possible alternative to other frameworks like spark, dropwizzard, ninja.
+
+I also have pushed pippo-demo.war in the blog repo just to make it easier for the reader to run the whole setup.
+
+git clone git@github.com:balamaci/blog-ui-bdd-testing.git
+
+./build.sh
+
+./start.sh
+the Serenity report gets generated and can be found and opened at ./target/site/serenity/index.html
+

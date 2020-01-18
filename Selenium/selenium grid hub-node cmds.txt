@@ -1,0 +1,27 @@
+java -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role hub
+
+
+To register browser instance at a node:
+java -Dwebdriver.chrome.driver=C:\Users\sball\Downloads\BrowserDrivers\chromedriver.exe -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role node -hub http://192.168.56.1:4444/grid/register
+
+
+
+
+To specify the port:
+java -Dwebdriver.chrome.driver=C:\Users\sball\Downloads\BrowserDrivers\chromedriver.exe -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role node -hub http://192.168.56.1:4444/grid/register -port 1010
+
+To register different browser instances:
+java -Dwebdriver.gecko.driver=C:\Users\sball\Downloads\BrowserDrivers\geckodriver.exe -Dwebdriver.chrome.driver=C:\Users\sball\Downloads\BrowserDrivers\chromedriver.exe -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role node -hub http://192.168.56.1:4444/grid/register
+
+
+To specify the browsers and number of browsers:
+java -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role webdriver -hub http://192.168.56.1:4444/grid/register -browser browserName=firefox,maxInstances=10 -browser browserName=iexplorer,maxInstances=10
+
+
+To specify the browsers and number of browser instances:
+java -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role webdriver -hub http://192.168.56.1:4444/grid/register -port 1610 -browser browserName=firefox,maxInstances=10 -browser browserName=iexplorer,maxInstances=8
+
+
+To specify the browser, number of browser instances and to open number of browsers for execution at time:
+java -jar C:\Users\sball\Downloads\selenium-server-standalone-3.141.59.jar -role webdriver -hub http://192.168.56.1:4444/grid/register -browser -maxSession 4 browserName=chrome,maxInstances=6 -maxSession 4
+ 

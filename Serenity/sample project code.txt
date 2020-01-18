@@ -1,0 +1,234 @@
+https://dev.to/cuongld2/serenity-automation-framework-part-2-4-automation-test-with-ui-using-cucumber-3n7b
+
+1. Serenity- cucumber dependency 
+
+        <!-- https://mvnrepository.com/artifact/net.serenity-bdd/serenity-cucumber -->
+        <dependency>
+            <groupId>net.serenity-bdd</groupId>
+            <artifactId>serenity-cucumber</artifactId>
+            <version>1.9.45</version>
+        </dependency>
+
+
+
+2. plugin to build serenity report
+
+
+
+<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18</version>
+                <configuration>
+                    <includes>
+                        <include>**/features/**/When*.java</include>
+                    </includes>
+                    <systemProperties>
+                        <webdriver.driver>${webdriver.driver}</webdriver.driver>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.serenity-bdd.maven.plugins</groupId>
+                <artifactId>serenity-maven-plugin</artifactId>
+                <version>${serenity.maven.version}</version>
+                <executions>
+                    <execution>
+                        <id>serenity-reports</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+3. in order to set default config for serenity we use serenity.config file or serenity.properties file.
+
+webdriver {
+  base.url = "https://cp.qc.coccoc.com/sign-in?lang=vi-VN"
+  driver = chrome
+}
+
+headless.mode=false
+serenity {
+  project.name = "Serenity Guidelines"
+  tag.failures = "true"
+  linked.tags = "issue"
+  restart.browser.for.each = scenario
+  take.screenshots = AFTER_EACH_STEP
+  console.headings = minimal
+  browser.maximized = true
+}
+
+jira {
+  url = "https://jira.tcbs.com.vn"
+  project = Auto
+  username = username
+  password = password
+}
+
+drivers {
+  windows {
+    webdriver.chrome.driver = src/main/resources/webdriver/windows/chromedriver.exe
+  }
+  mac {
+    webdriver.chrome.driver = src/main/resources/chromedriver
+  }
+  linux {
+    webdriver.chrome.driver = src/main/resources/webdriver/linux/chromedriver
+  }
+}
+
+
+we can define some common things like where store for each environment.
+
+drivers {
+  windows {
+    webdriver.chrome.driver = src/main/resources/webdriver/windows/chromedriver.exe
+  }
+  mac {
+    webdriver.chrome.driver = src/main/resources/chromedriver
+  }
+  linux {
+    webdriver.chrome.driver = src/main/resources/webdriver/linux/chromedriver
+  }
+}
+
+
+or take screen shot after each step
+
+serenity {
+  take.screenshots = AFTER_EACH_STEP
+}
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+page object sample code for login page
+
+@DefaultUrl("https://cp.qc.coccoc.com/sign-in?lang=vi-VN")
+public class LoginPage extends PageObject {
+
+    @FindBy(name = "email")
+    private WebElementFacade emailField;
+
+    @FindBy(name = "password")
+    private WebElementFacade passwordField;
+
+    @FindBy(css = "button[data-track_event-action='Login']")
+    private WebElementFacade btnLogin;
+
+    @FindBy(xpath = "//form[@method='post'][not(@name)]//div[@class='form-errors clearfix']")
+    private WebElementFacade errorMessageElement;
+
+    public void login(String email, String password) {
+        waitFor(emailField);
+        emailField.sendKeys(email);
+        passwordField.sendKeys(password);
+        btnLogin.click();
+    }
+
+    public String getMessageError(){
+        waitFor(errorMessageElement);
+        return errorMessageElement.getTextContent();
+    }
+
+
+}
+
+
+
+sample code feature file
+
+@Login
+  Scenario Outline: Login successfully with email and password
+    Given Navigate to quang cao coc coc login site
+    When Login with '<email>' and '<password>'
+    Then Should navigate to home page site
+    Examples:
+      |email|password|
+      |xxxxxxxxxx|xxxxxxxxxx|
+
+
+sample code for step defs
+
+public class LoginPage extends BaseTest {
+
+    @Steps
+    private pages.qcCocCoc.LoginPage loginPage_pageobject;
+
+    @cucumber.api.java.en.Given("^Navigate to quang cao coc coc login site$")
+    public void navigateToQuangCaoCocCocLoginSite() {
+
+
+        loginPage_pageobject.open();
+
+    }
+
+    @When("^Login with '(.*)' and '(.*)'$")
+    public void loginWithEmailAndPassword(String email, String password) {
+
+        loginPage_pageobject.login(email,password);
+
+    }
+
+    @Then("^Should navigate to home page site$")
+    public void shouldNavigateToHomePageSite() {
+        WebDriverWait wait = new WebDriverWait(getDriver(),2);
+        wait.until(ExpectedConditions.urlContains("welcome"));
+        softAssertImpl.assertAll();
+
+    }
+
+    @Then("^Should prompt with '(.*)'$")
+    public void shouldPromptWithErrormessage(String errorMessage) {
+
+        softAssertImpl.assertThat("Verify message error",loginPage_pageobject.getMessageError().contains(errorMessage),true);
+        softAssertImpl.assertAll();
+
+
+    }
+}
+
+
+sample runner class
+
+@RunWith(CucumberWithSerenity.class)
+@CucumberOptions(features = "src/test/resources/features/qcCocCoc/", tags = { "@Login" }, glue = { "ui.cucumber.qc_coccoc.step" })
+public class AcceptanceTest {
+}
+
+
+Test can be run in IDE as run
+or
+command
+> mvn clean verify -Dtest=path_to_the_AcceptanceTest
+
+
+To create serenity report 
+> mvn clean verify -Dtest=path_to_the_AcceptanceTest serenity:aggregate
+
+
+The test report will be index.html and located in target/site/serenity/index.html by default
